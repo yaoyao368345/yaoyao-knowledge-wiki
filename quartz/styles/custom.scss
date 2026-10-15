@@ -1,0 +1,99 @@
+@use "./base.scss";
+
+// Anchor the mobile drawer to the viewport, including its scrollbar width.
+// Its native slide animation, menu state, and scroll locking remain in Explorer.
+@media all and (max-width: 800px) {
+  html {
+    width: 100%;
+  }
+
+  .explorer .explorer-content {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    padding-inline: 1rem;
+  }
+}
+
+
+// Navigation state lives on html so it survives SPA body replacement.
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--secondary);
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+html[data-navigation-state="loading"]::before {
+  opacity: 1;
+  transform: scaleX(0.8);
+  transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-navigation-state="complete"]::before {
+  opacity: 0;
+  transform: scaleX(1);
+  transition: transform 120ms ease-out, opacity 180ms ease-out 100ms;
+}
+
+::view-transition-old(root) {
+  animation: knowledge-page-out 180ms ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: knowledge-page-in 180ms ease-out both;
+}
+
+@keyframes knowledge-page-out {
+  to { opacity: 0; }
+}
+
+@keyframes knowledge-page-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html::before {
+    transition: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+
+// Distinct current-state icons: columns for the normal layout, a book for reading.
+.readermode {
+  color: var(--darkgray);
+}
+
+.readermode > svg.reader-state-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.readermode .reader-state-book,
+:root[reader-mode="on"] .readermode .reader-state-layout {
+  display: none;
+}
+
+:root[reader-mode="on"] .readermode .reader-state-book {
+  display: block;
+}
+
+.readermode[aria-pressed="true"] {
+  color: var(--secondary);
+}

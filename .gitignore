@@ -1,0 +1,16 @@
+node_modules/
+.quartz/
+.quartz-cache/
+.npm-cache/
+public/
+public-base/
+content/.obsidian/
+content/.trash/
+content/private/
+*.tsbuildinfo
+reports/*.log
+reports/*.pid
+/reports/
+.env
+.env.*
+!.env.example
