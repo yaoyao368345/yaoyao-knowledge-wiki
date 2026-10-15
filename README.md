@@ -33,11 +33,12 @@ npm run check:knowledge
 - 站点、插件和配色：`quartz.config.yaml`；布局和目录排序：`quartz.ts`。
 - 阅读模式：普通布局显示分栏图标，专注阅读显示高亮书本；本地状态提示位于 `extensions/reader-mode-feedback.inline.ts`。
 - 页面切换和手机适配：`quartz/components/scripts/spa.inline.ts`、`quartz/styles/custom.scss`。系统启用减少动态效果时跳过切换动画。
+- 仓库子路径适配：`extensions/project-paths.mjs` 在生成浏览器资源时修正当前锁定插件的索引、目录、搜索和图谱路径，不修改插件缓存。插件升级导致调用形状变化时会停止构建，需复核适配。
 - 标题与大纲适配：`extensions/knowledge-content.mjs`，只在渲染时去重首个 H1，不修改笔记原文；可用 YAML `title` 指定标题、`enableToc: false` 隐藏大纲。
 
 ## 发布网站
 
-GitHub Actions 工作流位于 `.github/workflows/deploy.yml`。推送到 `main` 后自动安装锁定依赖和 Quartz 插件、构建、检查链接，再发布到 GitHub Pages。也可在 Actions 页面手动运行。
+GitHub Actions 工作流位于 `.github/workflows/deploy.yml`。推送到 `main` 后自动安装锁定依赖和 Quartz 插件、构建、检查链接，再发布到 GitHub Pages。也可在 Actions 页面手动运行。首次运行会安装全部插件；后续按锁文件和 Node 版本复用插件缓存。
 
 修改笔记后：
 

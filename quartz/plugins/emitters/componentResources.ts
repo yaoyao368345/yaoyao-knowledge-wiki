@@ -1,3 +1,4 @@
+import { adaptProjectPaths } from "../../../extensions/project-paths.mjs"
 import { FullSlug, joinSegments } from "../../util/path"
 import { QuartzEmitterPlugin } from "../types"
 
@@ -59,8 +60,12 @@ function getComponentResources(ctx: BuildCtx): ComponentResources {
     const normalizedAfterDOMLoaded = normalizeResource(afterDOMLoaded)
 
     normalizedCss.forEach((c) => componentResources.css.add(c))
-    normalizedBeforeDOMLoaded.forEach((b) => componentResources.beforeDOMLoaded.add(b))
-    normalizedAfterDOMLoaded.forEach((a) => componentResources.afterDOMLoaded.add(a))
+    normalizedBeforeDOMLoaded.forEach((b) =>
+      componentResources.beforeDOMLoaded.add(adaptProjectPaths(b, ctx.cfg.configuration.baseUrl)),
+    )
+    normalizedAfterDOMLoaded.forEach((a) =>
+      componentResources.afterDOMLoaded.add(adaptProjectPaths(a, ctx.cfg.configuration.baseUrl)),
+    )
   }
 
   return {
