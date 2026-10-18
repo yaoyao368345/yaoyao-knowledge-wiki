@@ -291,25 +291,24 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
       } else if (cfg.theme.fontOrigin === "googleFonts" && !cfg.theme.cdnCaching) {
         // when cdnCaching is true, we link to google fonts in Head.tsx
         const theme = ctx.cfg.configuration.theme
-        const response = await fetch(googleFontHref(theme))
+        // request woff2 + unicode-range slicing; a non-browser UA gets unsliced ttf
+        const googleFontsHeaders = {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        }
+        const response = await fetch(googleFontHref(theme), { headers: googleFontsHeaders })
         googleFontsStyleSheet = await response.text()
 
         if (theme.typography.title) {
           const title = ctx.cfg.configuration.pageTitle
-          const response = await fetch(googleFontSubsetHref(theme, title))
+          const response = await fetch(googleFontSubsetHref(theme, title), {
+            headers: googleFontsHeaders,
+          })
           googleFontsStyleSheet += `\n${await response.text()}`
         }
 
-        if (!cfg.baseUrl) {
-          throw new Error(
-            "baseUrl must be defined when using Google Fonts without cfg.theme.cdnCaching",
-          )
-        }
-
-        const { processedStylesheet, fontFiles } = await processGoogleFonts(
-          googleFontsStyleSheet,
-          cfg.baseUrl,
-        )
+        const { processedStylesheet, fontFiles } =
+          await processGoogleFonts(googleFontsStyleSheet)
         googleFontsStyleSheet = processedStylesheet
 
         // Download and save font files
