@@ -130,20 +130,29 @@ export async function processGoogleFonts(
   fontFiles: GoogleFontFile[]
 }> {
   const fontSourceRegex =
-    /url\((https:\/\/fonts.gstatic.com\/.+(?:\/|(?:kit=))(.+?)[.&].+?)\)\sformat\('(\w+?)'\);/g
+    /url\((https:\/\/fonts.gstatic.com\/[^)]+?)\)\s*format\('(\w+?)'\);/g
   const fontFiles: GoogleFontFile[] = []
   let processedStylesheet = stylesheet
 
   let match
   while ((match = fontSourceRegex.exec(stylesheet)) !== null) {
     const url = match[1]
-    const filename = match[2]
-    const extension = fontMimeMap[match[3].toLowerCase()]
+    const extension = fontMimeMap[match[2].toLowerCase()]
+    // keep the full basename (minus its final extension): unicode-range slice
+    // URLs differ only in an inner ".N" part, e.g. k3kXo…VH8V.4.woff2 vs .5.woff2,
+    // so stopping at the first "." would collapse every slice into one file
+    const filename = url
+      .split("/")
+      .pop()!
+      .split("?")[0]
+      .replace(/\.[^.]+$/, "")
     // index.css sits at the site root, so a relative URL works in dev and prod
     const staticUrl = `./static/fonts/${filename}.${extension}`
 
-    processedStylesheet = processedStylesheet.replace(url, staticUrl)
-    fontFiles.push({ url, filename, extension })
+    processedStylesheet = processedStylesheet.replaceAll(url, staticUrl)
+    if (!fontFiles.some((f) => f.filename === filename)) {
+      fontFiles.push({ url, filename, extension })
+    }
   }
 
   return { processedStylesheet, fontFiles }

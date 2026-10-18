@@ -297,6 +297,11 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
         const response = await fetch(googleFontHref(theme), { headers: googleFontsHeaders })
+        if (!response.ok) {
+          throw new Error(
+            `Google Fonts stylesheet request failed: ${response.status} ${response.statusText}`,
+          )
+        }
         googleFontsStyleSheet = await response.text()
 
         if (theme.typography.title) {
@@ -304,6 +309,11 @@ export const ComponentResources: QuartzEmitterPlugin = () => {
           const response = await fetch(googleFontSubsetHref(theme, title), {
             headers: googleFontsHeaders,
           })
+          if (!response.ok) {
+            throw new Error(
+              `Google Fonts subset request failed: ${response.status} ${response.statusText}`,
+            )
+          }
           googleFontsStyleSheet += `\n${await response.text()}`
         }
 
