@@ -140,12 +140,17 @@ export async function processGoogleFonts(
     const extension = fontMimeMap[match[2].toLowerCase()]
     // keep the full basename (minus its final extension): unicode-range slice
     // URLs differ only in an inner ".N" part, e.g. k3kXo…VH8V.4.woff2 vs .5.woff2,
-    // so stopping at the first "." would collapse every slice into one file
-    const filename = url
-      .split("/")
-      .pop()!
-      .split("?")[0]
-      .replace(/\.[^.]+$/, "")
+    // so stopping at the first "." would collapse every slice into one file.
+    // subset requests return /l/font?kit=<hash>.<ext> instead — name those by
+    // the kit hash, or every subset collapses to the same file
+    const kitName = url.split("kit=")[1]?.split(/[.&]/)[0]
+    const filename =
+      kitName ??
+      url
+        .split("/")
+        .pop()!
+        .split("?")[0]
+        .replace(/\.[^.]+$/, "")
     // index.css sits at the site root, so a relative URL works in dev and prod
     const staticUrl = `./static/fonts/${filename}.${extension}`
 
