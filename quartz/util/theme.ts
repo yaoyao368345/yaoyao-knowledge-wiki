@@ -29,6 +29,10 @@ export interface Theme {
     header: FontSpecification
     body: FontSpecification
     code: FontSpecification
+    // Fallback face appended after the Latin fonts, e.g. a CJK family,
+    // so non-Latin text renders in a consistent typeface instead of the
+    // browser's generic system fallback.
+    cjk?: FontSpecification
   }
   cdnCaching: boolean
   colors: Colors
@@ -86,12 +90,17 @@ function formatFontSpecification(
 }
 
 export function googleFontHref(theme: Theme) {
-  const { header, body, code } = theme.typography
-  const headerFont = formatFontSpecification("header", header)
-  const bodyFont = formatFontSpecification("body", body)
-  const codeFont = formatFontSpecification("code", code)
+  const { header, body, code, cjk } = theme.typography
+  const families = [
+    formatFontSpecification("header", header),
+    formatFontSpecification("body", body),
+    formatFontSpecification("code", code),
+  ]
+  if (cjk) {
+    families.push(formatFontSpecification("body", cjk))
+  }
 
-  return `https://fonts.googleapis.com/css2?family=${headerFont}&family=${bodyFont}&family=${codeFont}&display=swap`
+  return `https://fonts.googleapis.com/css2?family=${families.join("&family=")}&display=swap`
 }
 
 export function googleFontSubsetHref(theme: Theme, text: string) {
@@ -140,6 +149,11 @@ export async function processGoogleFonts(
   return { processedStylesheet, fontFiles }
 }
 
+function cjkFallback(theme: Theme): string {
+  const cjk = theme.typography.cjk
+  return cjk ? `"${getFontSpecificationName(cjk)}", ` : ""
+}
+
 export function joinStyles(theme: Theme, ...stylesheet: string[]) {
   return `
 ${stylesheet.join("\n\n")}
@@ -155,9 +169,9 @@ ${stylesheet.join("\n\n")}
   --highlight: ${theme.colors.lightMode.highlight};
   --textHighlight: ${theme.colors.lightMode.textHighlight};
 
-  --titleFont: "${getFontSpecificationName(theme.typography.title || theme.typography.header)}", ${DEFAULT_SANS_SERIF};
-  --headerFont: "${getFontSpecificationName(theme.typography.header)}", ${DEFAULT_SANS_SERIF};
-  --bodyFont: "${getFontSpecificationName(theme.typography.body)}", ${DEFAULT_SANS_SERIF};
+  --titleFont: "${getFontSpecificationName(theme.typography.title || theme.typography.header)}", ${cjkFallback(theme)}${DEFAULT_SANS_SERIF};
+  --headerFont: "${getFontSpecificationName(theme.typography.header)}", ${cjkFallback(theme)}${DEFAULT_SANS_SERIF};
+  --bodyFont: "${getFontSpecificationName(theme.typography.body)}", ${cjkFallback(theme)}${DEFAULT_SANS_SERIF};
   --codeFont: "${getFontSpecificationName(theme.typography.code)}", ${DEFAULT_MONO};
 }
 

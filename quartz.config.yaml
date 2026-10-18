@@ -18,6 +18,10 @@ configuration:
       header: Schibsted Grotesk
       body: Source Sans Pro
       code: IBM Plex Mono
+      cjk:
+        name: Noto Sans SC
+        weights: [400, 500, 700]
+        includeItalic: false
     colors:
       lightMode:
         light: '#faf8f8'
@@ -119,7 +123,7 @@ plugins:
   - source: github:quartz-community/favicon
     enabled: true
   - source: github:quartz-community/og-image
-    enabled: false
+    enabled: true
   - source: github:quartz-community/cname
     enabled: false
   - source: github:quartz-community/canvas-page
@@ -199,7 +203,8 @@ plugins:
   - source: github:quartz-community/footer
     enabled: true
     options:
-      links: {}
+      links:
+        GitHub: https://github.com/yaoyao368345/yaoyao-knowledge-wiki
   - source: github:quartz-community/recent-notes
     enabled: false
   - source: github:quartz-community/spacer
